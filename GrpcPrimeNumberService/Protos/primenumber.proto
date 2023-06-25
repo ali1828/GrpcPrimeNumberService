@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcService1";
+
+package primenumber;
+
+// The greeting service definition.
+service Primenumber {
+  //unary proto buf procedure
+  rpc IsPrime (RequestPrimeNumber) returns (ReplyPrimeNumber);
+  rpc IsPrimeStream (stream RequestPrimeNumber) returns (stream ReplyPrimeNumber); // BiDirectional proto buf procedure
+  rpc IsPrimeClientStream (stream RequestPrimeNumber) returns (ReplyPrimeNumber);// Client streaming proto buf procedure
+}
+
+// The request message containing the id, timestamp, number IsPrime or not, and message field.
+message RequestPrimeNumber {
+  int64 id = 1;
+  int64 timestamp = 2;
+  int64 number = 3;
+  string message = 4;
+}
+
+// The response message with prime and not prime numbers.
+message ReplyPrimeNumber {
+	repeated  RequestPrimeNumber Result = 1;
+}
