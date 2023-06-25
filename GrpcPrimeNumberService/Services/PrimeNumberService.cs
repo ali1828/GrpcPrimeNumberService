@@ -4,8 +4,10 @@ using System.Collections.Concurrent;
 
 namespace GrpcPrimeNumberService.Services
 {
+   
     public class PrimeNumberService : Primenumber.PrimenumberBase
     {
+        private static ConcurrentDictionary<long, PrimeNumberWithWeights> primeNumberDictionary = new ConcurrentDictionary<long, PrimeNumberWithWeights>();
         private static object lockObject = new object();
         private static long TotalMessagesReceived = 0;
         private readonly ILogger<PrimeNumberService> _logger;
@@ -15,7 +17,6 @@ namespace GrpcPrimeNumberService.Services
             Task.Run(DisplayRecordsPrimeNumbersPeriodically);
         }
 
-        ConcurrentDictionary<long, long> primeNumberDictionary = new ConcurrentDictionary<long, long>();
 
         public override async Task IsPrimeStream(IAsyncStreamReader<RequestPrimeNumber> requestStream,
             IServerStreamWriter<ReplyPrimeNumber> responseStream, ServerCallContext context)
@@ -70,7 +71,12 @@ namespace GrpcPrimeNumberService.Services
             {
                 if (primeNumberDictionary.Where(p => p.Key == request.Number).Count() == 0)
                 {
-                    primeNumberDictionary.TryAdd(requestedNumber, requestedNumber);
+                    primeNumberDictionary.TryAdd(requestedNumber, new PrimeNumberWithWeights { IsPrime = true, Number = requestedNumber, weight = 1});
+                }
+                else if(primeNumberDictionary.Where(p => p.Key == request.Number).Count() == 1)
+                {
+                    var item = primeNumberDictionary.Where(p => p.Key == request.Number).FirstOrDefault();
+                    item.Value.weight += 1;
                 }
                 response.Result.Add(new RequestPrimeNumber
                 { Id = request.Id, Number = requestedNumber, Message = requestedNumber + " IS PRIME NUMBER.", Timestamp = request.Timestamp });
@@ -81,22 +87,28 @@ namespace GrpcPrimeNumberService.Services
         {
             while (true)
             {
-                Console.WriteLine("  Total Number of Messages Received:           " + TotalMessagesReceived);
+                
                 if (primeNumberDictionary.Count > 0)
                 {
                     var sortedPrimeNumberDic = (from p in primeNumberDictionary
-                                                orderby p.Value descending
+                                                orderby p.Value.weight descending, p.Value.Number descending
                                                 select p).Take(10);
-
+                    Console.WriteLine("  Total Number of Messages Received:           " + TotalMessagesReceived);
                     Console.WriteLine("  Top 10 prime numbers are: ");
                     foreach (var item in sortedPrimeNumberDic)
                     {
-                        Console.WriteLine("     " + item.Value);
+                        Console.WriteLine("     " + item.Value.Number);
                     }
 
                     await Task.Delay(TimeSpan.FromSeconds(1));
                 }
             }
         }
+    }
+    public class PrimeNumberWithWeights
+    {
+        public long Number { get; set; }
+        public bool IsPrime { get; set; } = false;
+        public int weight { get; set; } = 0;
     }
 }
