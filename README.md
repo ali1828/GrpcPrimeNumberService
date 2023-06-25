@@ -1,5 +1,5 @@
 # GrpcPrimeNumberService
-# Implementation of gRPC Bi-Directional for finding prime numbers (Server + Clinet)
+# Implementation of gRPC Bi-Directional call for finding prime numbers (Server + Clinet)
 gRPC trasmits data in binary form that's why it is very fast.
 ## There are 4 types of gRPC procedure calls
 1. Unary (1-1)
