@@ -12,6 +12,7 @@ namespace GrpcPrimeNumberService.Services
         public PrimeNumberService(ILogger<PrimeNumberService> logger)
         {
             _logger = logger;
+            Task.Run(DisplayRecordsPrimeNumbersPeriodically);
         }
 
         ConcurrentDictionary<long, long> primeNumberDictionary = new ConcurrentDictionary<long, long>();
@@ -73,6 +74,28 @@ namespace GrpcPrimeNumberService.Services
                 }
                 response.Result.Add(new RequestPrimeNumber
                 { Id = request.Id, Number = requestedNumber, Message = requestedNumber + " IS PRIME NUMBER.", Timestamp = request.Timestamp });
+            }
+        }
+
+        private async Task DisplayRecordsPrimeNumbersPeriodically()
+        {
+            while (true)
+            {
+                Console.WriteLine("  Total Number of Messages Received:           " + TotalMessagesReceived);
+                if (primeNumberDictionary.Count > 0)
+                {
+                    var sortedPrimeNumberDic = (from p in primeNumberDictionary
+                                                orderby p.Value descending
+                                                select p).Take(10);
+
+                    Console.WriteLine("  Top 10 prime numbers are: ");
+                    foreach (var item in sortedPrimeNumberDic)
+                    {
+                        Console.WriteLine("     " + item.Value);
+                    }
+
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                }
             }
         }
     }
