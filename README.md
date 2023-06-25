@@ -39,6 +39,7 @@ If you are unable to execute those bat files then follow below steps:
 3. This command will starting serving the service
 4. For client code, go to client code root directory ConsoleApp
 5. Write dotnet run and press enter
-6. It will the client and trying to send messages to the server. 
+6. It will the client and trying to send messages to the server.
+   
 ![image](https://github.com/ali1828/GrpcPrimeNumberService/assets/15609965/5122ef39-fa14-421d-b6fd-430af4d92f7a)
 
